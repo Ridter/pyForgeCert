@@ -1,0 +1,2 @@
+cryptography>=3.4.7
+pyOpenSSL>=20.0.1
