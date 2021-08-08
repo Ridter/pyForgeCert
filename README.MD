@@ -49,3 +49,11 @@ python tools/gettgtpkinit.py -cert-pfx admin.pfx -pfx-pass 123 cgdomain.com/admi
 python tools/getnthash.py cgdomain.com/administrator -dc-ip 10.211.55.200 -k 62bcb453bb21d4f8dd04492dd01d61137cb95367ca7e47587251e0563e6460f7
 ```
 ![](https://blogpics-1251691280.file.myqcloud.com/imgs/202108061333685.png)
+
+**How to change language**
+
+Edit conf.py and change LANG variable to your lang
+
+**Supported Languages**
+English (set by default in repository): en
+Spanish: es
