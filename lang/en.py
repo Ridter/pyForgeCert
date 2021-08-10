@@ -1,0 +1,16 @@
+LANGCODE = "en"
+input_help = "Input file, default (PEM)"
+password_help = "Password to the CA private key file.(PFX file)."
+subject_help = "Subject name in the certificate."
+altname_help = "UPN of the user to authenticate as."
+output_help = "Path where to save the new .pfx certificate."
+opassword_help = "Password to the .pfx file."
+crl_help = "Ldap path to a CRL for the forged certificate."
+store_true_help = 'If the input file is PFX.'
+input_doesnt_exist = "[-] Input file doesn't exist"
+read_file_error = "[-] Error Reading File"
+cert_info = "CA Certificate Information: "
+forged_cert_info = "\nForged Certificate Information: "
+export_partone = "\n[+] File Export Success, PFX file"
+export_parttwo = "with password"
+
