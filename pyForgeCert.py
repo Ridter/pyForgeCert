@@ -94,7 +94,7 @@ def main():
     parser = argparse.ArgumentParser(add_help=True, description='pyForgeCert')
     parser.add_argument("-i", "--input", required=True, help="Input file, default (PEM).")
     parser.add_argument("-p", "--ipassword", required=False, default="", help="Password to the CA private key file.(PFX file).")
-    parser.add_argument("-s", "--subject", required=False, choices=['User', 'Computer'], default="User", help="Subject name in the certificate.")
+    parser.add_argument("-s", "--subject", required=False, choices=['User', 'Computer','Administrator','DomainController'], default="User", help="Subject name in the certificate.")
     parser.add_argument("-a", "--altname", required=False, default="administrator", help="UPN of the user to authenticate as.")
     parser.add_argument("-o", "--output", required=True, help="Path where to save the new .pfx certificate.")
     parser.add_argument("-se", "--serial", required=False, default=None, help="Serial number for the forged certificate.")
