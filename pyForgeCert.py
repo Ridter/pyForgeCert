@@ -13,7 +13,8 @@ from cryptography.x509.oid import ExtensionOID
 from cryptography.hazmat.primitives import hashes
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
-from cryptography.hazmat.primitives.serialization import pkcs12
+from cryptography.hazmat.primitives.serialization import pkcs12, BestAvailableEncryption
+
 from OpenSSL import crypto
 
 
@@ -82,12 +83,21 @@ def generate_certificate(cert_decoded, subject, private_key, public_key, ldap_ur
 
 
 def generate_pfx(private, cert, password):
-    pem_cert = crypto.dump_certificate(crypto.FILETYPE_PEM, cert)
-    certificate = crypto.load_certificate(crypto.FILETYPE_PEM, pem_cert)
-    p12 = crypto.PKCS12()
-    p12.set_certificate(certificate)
-    p12.set_privatekey(private)
-    return p12.export(password)
+    # pem_cert = crypto.dump_certificate(crypto.FILETYPE_PEM, cert)
+    # certificate = crypto.load_certificate(crypto.FILETYPE_PEM, pem_cert)
+    # p12 = crypto.PKCS12()
+    # p12.set_certificate(certificate)
+    # p12.set_privatekey(private)
+    # pfx = p12.export(password)
+    # return pfx
+    pfx = pkcs12.serialize_key_and_certificates(
+        name=b"",
+        key=private,
+        cert=cert,
+        cas=None,
+        encryption_algorithm=BestAvailableEncryption(password),
+    )
+    return pfx
 
 
 def main():
@@ -147,7 +157,7 @@ def main():
         password = ''.join(random.choice(string.ascii_letters) for _ in range(8))
     else:
         password = options.opassword
-    certificate_store = generate_pfx(private_key, new_cert, password.encode())
+    certificate_store = generate_pfx(crypto_pri_key, new_cert, password.encode())
     out_put = options.output
     with open(out_put, "wb") as f:
         f.write(certificate_store)
